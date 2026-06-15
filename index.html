@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ДанКири · Замер стены v0.1</title>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f1f1f1;color:#202124}
+header{position:sticky;top:0;z-index:20;background:white;border-bottom:1px solid #d1d5db;padding:12px 14px}
+h1{font-size:18px;margin:0}.sub{font-size:13px;color:#6b7280;margin-top:4px}
+main{padding:12px;max-width:900px;margin:0 auto}.card{background:white;border-radius:16px;padding:12px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,.file-btn{border:0;border-radius:12px;background:#222;color:#fff;padding:11px 14px;font-weight:700;font-size:15px;cursor:pointer;display:inline-block}
+button.secondary{background:#6b7280}button.green{background:#16a34a}button.orange{background:#f59e0b;color:#111}
+input[type=file]{display:none}.mode{padding:8px 10px;border-radius:999px;background:#eef2ff;color:#1d4ed8;font-size:13px;font-weight:700}
+.photo-wrap{position:relative;width:100%;height:56vh;min-height:340px;background:#ddd;border:2px solid #d1d5db;border-radius:16px;overflow:hidden;touch-action:manipulation}
+.photo-wrap img{width:100%;height:100%;object-fit:contain;background:#111;display:block}.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#555;padding:20px;line-height:1.35}
+.marker{position:absolute;width:58px;height:46px;transform:translate(-50%,-50%);border:3px solid #f59e0b;border-radius:12px;background:rgba(255,255,255,.82);color:#111;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.22);user-select:none;cursor:pointer}
+.marker.done{border-color:#16a34a;background:rgba(220,255,225,.9)}.marker.active{border-color:#2563eb;background:rgba(219,234,254,.95)}
+.hint{font-size:14px;color:#6b7280;line-height:1.45}.panel{display:none;position:fixed;left:0;right:0;bottom:0;z-index:50;background:white;border-radius:22px 22px 0 0;padding:16px;box-shadow:0 -8px 28px rgba(0,0,0,.25);max-height:74vh;overflow:auto}
+.panel h2{margin:0 0 12px;font-size:20px}label{display:block;font-size:14px;font-weight:700;margin:12px 0 6px}
+input[type=number],input[type=text]{width:100%;border:1px solid #d1d5db;border-radius:12px;padding:12px;font-size:18px;background:#fff}
+.small{font-size:12px;color:#6b7280;margin-top:4px}.progress{display:flex;align-items:center;justify-content:space-between;font-size:14px;color:#6b7280;margin-top:8px}
+.json-box{background:#0b1020;color:#a7f3d0;padding:12px;border-radius:12px;overflow-x:auto;font-size:12px;max-height:250px}
+.wall-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:520px){.photo-wrap{height:52vh}.wall-fields{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>ДанКири · Замер стены v0.1</h1><div class="sub">Ручной режим · слой «Электрика»</div></header>
+<main>
+<section class="card">
+<div class="row">
+<label class="file-btn" for="photoInput">Загрузить фото стены</label>
+<input id="photoInput" type="file" accept="image/*">
+<button class="orange" id="addSocketBtn">+ Розетка</button>
+<button class="secondary" id="clearBtn">Очистить</button>
+</div>
+<div class="progress"><span id="modeText">Сначала загрузите фото стены</span><span id="countText">0 объектов</span></div>
+</section>
+<section class="card">
+<div class="mode">Слой: Электрика</div>
+<p class="hint">Нажмите «+ Розетка», затем ткните пальцем в центр розетки на фото. Появится обводка. Нажмите на неё, чтобы ввести размеры.</p>
+<div class="photo-wrap" id="photoArea">
+<div class="placeholder" id="placeholder">Здесь будет фото стены.<br>После загрузки фото можно отмечать розетки.</div>
+<img id="wallPhoto" alt="" style="display:none;">
+</div>
+</section>
+<section class="card">
+<h3 style="margin-top:0">Габариты стены</h3>
+<div class="wall-fields">
+<div><label>Ширина стены, мм</label><input type="number" id="wallWidth" placeholder="например 5772"></div>
+<div><label>Высота стены, мм</label><input type="number" id="wallHeight" placeholder="например 2714"></div>
+</div>
+<p class="hint">На следующем этапе добавим высоту слева / центр / справа и проверку завалов.</p>
+</section>
+<section class="card"><h3 style="margin-top:0">Данные замера</h3><pre class="json-box" id="jsonOut">{}</pre></section>
+</main>
+<div class="panel" id="measurePanel">
+<h2 id="panelTitle">Розетка</h2>
+<label>От ближайшей стены до центра розетки, мм</label>
+<input type="number" id="socketX" inputmode="numeric" placeholder="например 560">
+<div class="small">Правило: меряем до центра механизма или центра группы.</div>
+<label>От пола до центра розетки, мм</label>
+<input type="number" id="socketY" inputmode="numeric" placeholder="например 250">
+<label>Комментарий</label>
+<input type="text" id="socketNote" placeholder="например: двойная розетка">
+<div class="row" style="margin-top:14px">
+<button class="green" id="saveBtn">Сохранить</button>
+<button class="secondary" id="closeBtn">Закрыть</button>
+<button class="secondary" id="deleteBtn">Удалить</button>
+</div>
+</div>
+<script>
+const photoInput=document.getElementById('photoInput'),wallPhoto=document.getElementById('wallPhoto'),placeholder=document.getElementById('placeholder'),photoArea=document.getElementById('photoArea'),addSocketBtn=document.getElementById('addSocketBtn'),clearBtn=document.getElementById('clearBtn'),modeText=document.getElementById('modeText'),countText=document.getElementById('countText'),jsonOut=document.getElementById('jsonOut'),panel=document.getElementById('measurePanel'),panelTitle=document.getElementById('panelTitle'),socketX=document.getElementById('socketX'),socketY=document.getElementById('socketY'),socketNote=document.getElementById('socketNote'),saveBtn=document.getElementById('saveBtn'),closeBtn=document.getElementById('closeBtn'),deleteBtn=document.getElementById('deleteBtn'),wallWidth=document.getElementById('wallWidth'),wallHeight=document.getElementById('wallHeight');
+let addMode=false,currentId=null,counter=0,objects=[];
+photoInput.addEventListener('change',function(){const file=this.files[0];if(!file)return;wallPhoto.src=URL.createObjectURL(file);wallPhoto.style.display='block';placeholder.style.display='none';modeText.textContent='Фото загружено. Можно добавлять розетки.';updateJson()});
+addSocketBtn.addEventListener('click',function(){addMode=true;modeText.textContent='Теперь ткните в центр розетки на фото'});
+photoArea.addEventListener('click',function(e){if(!addMode)return;if(e.target.classList.contains('marker'))return;if(wallPhoto.style.display==='none'){alert('Сначала загрузите фото стены.');addMode=false;return}const rect=photoArea.getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width;const y=(e.clientY-rect.top)/rect.height;counter+=1;const id='R'+counter;const obj={id,type:'socket',layer:'electrics',photo_x:+x.toFixed(4),photo_y:+y.toFixed(4),x_from_wall:null,y_from_floor:null,note:'',status:'not_measured'};objects.push(obj);drawMarker(obj);addMode=false;modeText.textContent='Розетка добавлена. Нажмите на метку, чтобы ввести размеры.';openPanel(id);updateJson()});
+function drawMarker(obj){const marker=document.createElement('div');marker.className='marker';marker.id='marker_'+obj.id;marker.textContent=obj.id;marker.style.left=(obj.photo_x*100)+'%';marker.style.top=(obj.photo_y*100)+'%';marker.addEventListener('click',function(e){e.stopPropagation();openPanel(obj.id)});photoArea.appendChild(marker)}
+function openPanel(id){currentId=id;const obj=objects.find(o=>o.id===id);if(!obj)return;document.querySelectorAll('.marker').forEach(m=>m.classList.remove('active'));const marker=document.getElementById('marker_'+id);if(marker)marker.classList.add('active');panelTitle.textContent=obj.id+' — розетка';socketX.value=obj.x_from_wall??'';socketY.value=obj.y_from_floor??'';socketNote.value=obj.note??'';panel.style.display='block'}
+saveBtn.addEventListener('click',function(){if(!currentId)return;const obj=objects.find(o=>o.id===currentId);if(!obj)return;obj.x_from_wall=socketX.value===''?null:Number(socketX.value);obj.y_from_floor=socketY.value===''?null:Number(socketY.value);obj.note=socketNote.value||'';obj.status=(obj.x_from_wall!==null&&obj.y_from_floor!==null)?'measured':'not_measured';const marker=document.getElementById('marker_'+currentId);if(marker){marker.classList.remove('active');if(obj.status==='measured')marker.classList.add('done')}closePanel();updateJson()});
+closeBtn.addEventListener('click',closePanel);
+deleteBtn.addEventListener('click',function(){if(!currentId)return;objects=objects.filter(o=>o.id!==currentId);const marker=document.getElementById('marker_'+currentId);if(marker)marker.remove();closePanel();updateJson()});
+clearBtn.addEventListener('click',function(){if(!confirm('Очистить все розетки?'))return;objects=[];counter=0;document.querySelectorAll('.marker').forEach(m=>m.remove());closePanel();updateJson()});
+wallWidth.addEventListener('input',updateJson);wallHeight.addEventListener('input',updateJson);
+function closePanel(){panel.style.display='none';document.querySelectorAll('.marker').forEach(m=>m.classList.remove('active'));currentId=null}
+function updateJson(){const result={version:'0.1',wall:{width_mm:wallWidth.value?Number(wallWidth.value):null,height_mm:wallHeight.value?Number(wallHeight.value):null},layers:['electrics'],objects};const measured=objects.filter(o=>o.status==='measured').length;countText.textContent=measured+'/'+objects.length+' измерено';jsonOut.textContent=JSON.stringify(result,null,2)}
+updateJson();
+</script>
+</body>
+</html>
