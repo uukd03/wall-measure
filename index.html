@@ -2,84 +2,322 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Тест значков v0.2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wall Measure · Markers v0.3</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f1f1f1;color:#202124}
-header{position:sticky;top:0;z-index:20;background:white;border-bottom:1px solid #ddd;padding:12px 14px}
-h1{margin:0;font-size:18px}.sub{margin-top:4px;font-size:13px;color:#6b7280}
-main{padding:12px;max-width:900px;margin:0 auto}
-.card{background:white;border-radius:16px;padding:12px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f1f1f1;color:#202124;overscroll-behavior:none}
+header{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #ddd;padding:10px 12px}
+h1{margin:0;font-size:17px}.sub{margin-top:3px;font-size:12px;color:#6b7280}
+main{padding:10px;max-width:960px;margin:0 auto}
+.card{background:#fff;border-radius:16px;padding:10px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-button,.file-btn{border:0;border-radius:12px;padding:11px 14px;font-weight:700;font-size:15px;cursor:pointer;background:#222;color:white;display:inline-block}
-button.gray{background:#6b7280}button.red{background:#dc2626}
+button,.file-btn{border:0;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;cursor:pointer;background:#222;color:#fff;display:inline-block}
+button.gray{background:#6b7280}button.red{background:#dc2626}button.blue{background:#2563eb}
 input[type=file]{display:none}
-.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.tool{border:2px solid #d1d5db;background:white;color:#111;border-radius:14px;padding:10px 6px;font-size:13px;text-align:center;cursor:pointer;user-select:none}
-.tool .big{font-size:24px;display:block;margin-bottom:4px}
+.tools{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px}
+.tool{border:2px solid #d1d5db;background:#fff;color:#111;border-radius:14px;padding:8px 4px;font-size:12px;text-align:center;cursor:pointer;user-select:none}
+.tool .big{font-size:23px;display:block;margin-bottom:3px}
 .tool.active{border-color:#2563eb;background:#dbeafe}
-.photo-wrap{position:relative;width:100%;height:60vh;min-height:360px;background:#ddd;border:2px solid #d1d5db;border-radius:16px;overflow:hidden;touch-action:none}
-.photo-wrap img{width:100%;height:100%;object-fit:contain;background:#111;display:block}
-.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#555;padding:20px;line-height:1.35}
-.mark{position:absolute;transform:translate(-50%,-50%);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:grab;user-select:none;touch-action:none;z-index:10}
-.mark:active{cursor:grabbing}
-.mark.circle{border:3px solid rgba(22,163,74,.95);border-radius:50%;background:rgba(22,163,74,.13)}
-.mark.ring{width:46px;height:34px;border:3px solid rgba(245,158,11,.95);border-radius:10px;background:rgba(245,158,11,.12)}
-.mark.dot{width:22px;height:22px;border-radius:50%;background:rgba(37,99,235,.9);border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,.35)}
-.mark.badge{width:auto;min-width:28px;height:28px;padding:0 8px;border-radius:999px;background:rgba(22,163,74,.92);color:white;font-size:16px;font-weight:900;box-shadow:0 2px 10px rgba(0,0,0,.35)}
-.mark.icon{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.88);border:2px solid rgba(0,0,0,.45);font-size:21px;box-shadow:0 2px 10px rgba(0,0,0,.28)}
-.mark.corner{width:42px;height:42px;border:none}
-.mark.corner:before,.mark.corner:after{content:"";position:absolute;width:18px;height:18px;border-color:#16a34a;border-style:solid}
-.mark.corner:before{left:0;top:0;border-width:3px 0 0 3px}
-.mark.corner:after{right:0;bottom:0;border-width:0 3px 3px 0}
-.mark.selected{outline:3px solid #2563eb;outline-offset:4px}
-.hint{font-size:14px;color:#6b7280;line-height:1.45}.status{font-size:14px;color:#374151;margin-top:8px}.mini{font-size:12px;color:#6b7280}
+.photo-shell{position:relative;width:100%;height:63vh;min-height:390px;background:#202020;border:2px solid #cfcfcf;border-radius:16px;overflow:hidden;touch-action:none}
+.stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.stage img{display:block;max-width:none;user-select:none;-webkit-user-drag:none}
+.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#ddd;padding:20px;line-height:1.35}
+.mark{position:absolute;left:0;top:0;transform:translate(-50%,-50%);z-index:20;cursor:grab;user-select:none;touch-action:none}
+.mark.selected{filter:drop-shadow(0 0 0 #2563eb) drop-shadow(0 0 5px #2563eb)}
+/* 1 dot */
+.mark.dot{width:14px;height:14px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+/* 2 crosshair */
+.mark.cross{width:42px;height:42px}
+.mark.cross:before,.mark.cross:after{content:"";position:absolute;background:#16a34a}
+.mark.cross:before{left:19px;top:4px;width:4px;height:34px;border-radius:3px}
+.mark.cross:after{left:4px;top:19px;width:34px;height:4px;border-radius:3px}
+.mark.cross .hole{position:absolute;left:12px;top:12px;width:18px;height:18px;border:3px solid #16a34a;border-radius:50%;background:rgba(255,255,255,.08)}
+/* 3 callout */
+.mark.callout{width:92px;height:34px;transform:translate(-8px,-29px)}
+.mark.callout .pin{position:absolute;left:0;bottom:0;width:10px;height:10px;border-radius:50%;background:#f59e0b;border:2px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.45)}
+.mark.callout .line{position:absolute;left:8px;bottom:7px;width:34px;height:2px;background:#f59e0b;transform:rotate(-18deg);transform-origin:left center}
+.mark.callout .tag{position:absolute;right:0;top:0;min-width:44px;height:25px;border-radius:999px;background:rgba(245,158,11,.95);color:#111;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;padding:0 8px;box-shadow:0 2px 9px rgba(0,0,0,.35)}
+/* 4 corners */
+.mark.corners{width:46px;height:38px}
+.mark.corners:before,.mark.corners:after,.mark.corners .a,.mark.corners .b{content:"";position:absolute;width:13px;height:13px;border-color:#16a34a;border-style:solid}
+.mark.corners:before{left:0;top:0;border-width:3px 0 0 3px}
+.mark.corners:after{right:0;top:0;border-width:3px 3px 0 0}
+.mark.corners .a{left:0;bottom:0;border-width:0 0 3px 3px}
+.mark.corners .b{right:0;bottom:0;border-width:0 3px 3px 0}
+/* 5 pin */
+.mark.pin{width:25px;height:34px;transform:translate(-50%,-100%)}
+.mark.pin:before{content:"";position:absolute;left:2px;top:0;width:21px;height:21px;background:#ef4444;border:2px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.mark.pin:after{content:"";position:absolute;left:9px;top:6px;width:7px;height:7px;background:#fff;border-radius:50%}
+.status{font-size:13px;color:#374151;margin-top:8px;line-height:1.35}
+.hint{font-size:13px;color:#6b7280;line-height:1.4}
+.mini{font-size:12px;color:#6b7280;margin-top:8px}
+.scale-badge{position:absolute;right:10px;bottom:10px;z-index:25;background:rgba(0,0,0,.65);color:#fff;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
-<header><h1>Тест читаемости значков v0.2</h1><div class="sub">Без замеров · только отметки на фото</div></header>
+<header>
+<h1>Тест маркировки v0.3</h1>
+<div class="sub">Зум + панорама + разные метки</div>
+</header>
+
 <main>
 <section class="card">
 <div class="row">
 <label class="file-btn" for="photoInput">Загрузить фото</label>
 <input id="photoInput" type="file" accept="image/*">
+<button class="blue" id="fitBtn">Вписать фото</button>
 <button class="gray" id="deleteBtn">Удалить выбранный</button>
 <button class="red" id="clearBtn">Очистить всё</button>
 </div>
+
 <div class="tools">
-<div class="tool active" data-kind="circle" data-label=""><span class="big">○</span>Зелёный круг</div>
-<div class="tool" data-kind="ring" data-label=""><span class="big">▢</span>Жёлтая рамка</div>
-<div class="tool" data-kind="dot" data-label=""><span class="big">●</span>Синяя точка</div>
-<div class="tool" data-kind="badge" data-label="✓"><span class="big">✓</span>Мини-галочка</div>
-<div class="tool" data-kind="icon" data-label="🔌"><span class="big">🔌</span>Розетка</div>
-<div class="tool" data-kind="icon" data-label="💡"><span class="big">💡</span>Свет</div>
-<div class="tool" data-kind="icon" data-label="⚡"><span class="big">⚡</span>Провод</div>
-<div class="tool" data-kind="corner" data-label=""><span class="big">⌜⌟</span>Углы</div>
+<div class="tool active" data-kind="dot"><span class="big">●</span>Точка</div>
+<div class="tool" data-kind="cross"><span class="big">⌖</span>Прицел</div>
+<div class="tool" data-kind="callout"><span class="big">↗</span>Выноска</div>
+<div class="tool" data-kind="corners"><span class="big">⌜⌟</span>Углы</div>
+<div class="tool" data-kind="pin"><span class="big">📍</span>Пин</div>
 </div>
-<div class="status" id="status">Выбран: зелёный круг. Ткни на фото, чтобы поставить отметку.</div>
+<div class="status" id="status">Выбран режим: точка. Загрузите фото и ткните по объекту.</div>
 </section>
+
 <section class="card">
-<p class="hint">Выбери вид значка → ткни на объект на фото → появится отметка. Повторно нажми на отметку и перетащи пальцем.</p>
-<div class="photo-wrap" id="photoArea">
-<div class="placeholder" id="placeholder">Загрузите фото стены.<br>Потом выбирайте значки и ставьте их на розетки, провода, выключатели.</div>
+<p class="hint">
+Проверяем только читаемость. Одним пальцем можно двигать фото, щипком — приближать. 
+Короткий тап по фото ставит метку. Тап по метке выбирает её, удержание/движение — перетаскивает.
+</p>
+
+<div class="photo-shell" id="photoShell">
+<div class="placeholder" id="placeholder">Загрузите фото стены</div>
+<div class="stage" id="stage">
 <img id="wallPhoto" alt="" style="display:none;">
 </div>
-<p class="mini">Если поставил не туда — нажми на значок и двигай его.</p>
+<div class="scale-badge" id="scaleBadge">100%</div>
+</div>
+
+<div class="mini">Совет: приблизь дальнюю розетку, поставь маленькую метку, потом отдали фото и проверь читаемость.</div>
 </section>
 </main>
+
 <script>
-const photoInput=document.getElementById('photoInput'),wallPhoto=document.getElementById('wallPhoto'),placeholder=document.getElementById('placeholder'),photoArea=document.getElementById('photoArea'),tools=document.querySelectorAll('.tool'),statusText=document.getElementById('status'),clearBtn=document.getElementById('clearBtn'),deleteBtn=document.getElementById('deleteBtn');
-let selectedTool={kind:'circle',label:''},selectedMark=null,draggingMark=null;
-photoInput.addEventListener('change',function(){const file=this.files[0];if(!file)return;wallPhoto.src=URL.createObjectURL(file);wallPhoto.style.display='block';placeholder.style.display='none'});
-tools.forEach(tool=>{tool.addEventListener('click',()=>{tools.forEach(t=>t.classList.remove('active'));tool.classList.add('active');selectedTool={kind:tool.dataset.kind,label:tool.dataset.label||''};statusText.textContent='Выбран: '+tool.innerText.replace(/\\n/g,' ')})});
-photoArea.addEventListener('pointerdown',e=>{if(e.target.classList.contains('mark')){selectMark(e.target);draggingMark=e.target;draggingMark.setPointerCapture(e.pointerId);return}if(wallPhoto.style.display==='none'){alert('Сначала загрузите фото стены.');return}const rect=photoArea.getBoundingClientRect();createMark((e.clientX-rect.left)/rect.width,(e.clientY-rect.top)/rect.height)});
-photoArea.addEventListener('pointermove',e=>{if(!draggingMark)return;const rect=photoArea.getBoundingClientRect();let x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;x=Math.max(0,Math.min(1,x));y=Math.max(0,Math.min(1,y));draggingMark.style.left=(x*100)+'%';draggingMark.style.top=(y*100)+'%';draggingMark.dataset.x=x.toFixed(4);draggingMark.dataset.y=y.toFixed(4)});
-photoArea.addEventListener('pointerup',()=>{draggingMark=null});
-function createMark(x,y){const mark=document.createElement('div');mark.className='mark '+selectedTool.kind;mark.style.left=(x*100)+'%';mark.style.top=(y*100)+'%';mark.dataset.x=x.toFixed(4);mark.dataset.y=y.toFixed(4);if(selectedTool.label)mark.textContent=selectedTool.label;photoArea.appendChild(mark);selectMark(mark)}
-function selectMark(mark){if(selectedMark)selectedMark.classList.remove('selected');selectedMark=mark;selectedMark.classList.add('selected')}
-deleteBtn.addEventListener('click',()=>{if(!selectedMark)return;selectedMark.remove();selectedMark=null});
-clearBtn.addEventListener('click',()=>{document.querySelectorAll('.mark').forEach(m=>m.remove());selectedMark=null});
+const photoInput=document.getElementById('photoInput');
+const wallPhoto=document.getElementById('wallPhoto');
+const placeholder=document.getElementById('placeholder');
+const shell=document.getElementById('photoShell');
+const stage=document.getElementById('stage');
+const tools=document.querySelectorAll('.tool');
+const statusText=document.getElementById('status');
+const clearBtn=document.getElementById('clearBtn');
+const deleteBtn=document.getElementById('deleteBtn');
+const fitBtn=document.getElementById('fitBtn');
+const scaleBadge=document.getElementById('scaleBadge');
+
+let selectedTool='dot';
+let selectedMark=null;
+
+let imgW=0,imgH=0;
+let scale=1, tx=0, ty=0;
+let pointers=new Map();
+let lastPan=null;
+let pinchStart=null;
+let downInfo=null;
+let draggingMark=null;
+let markCounter=0;
+
+function applyTransform(){
+  stage.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+  scaleBadge.textContent=Math.round(scale*100)+'%';
+}
+
+function fitImage(){
+  if(!imgW || !imgH) return;
+  const sw=shell.clientWidth, sh=shell.clientHeight;
+  scale=Math.min(sw/imgW, sh/imgH);
+  tx=(sw-imgW*scale)/2;
+  ty=(sh-imgH*scale)/2;
+  applyTransform();
+}
+
+photoInput.addEventListener('change',function(){
+  const file=this.files[0];
+  if(!file)return;
+  const url=URL.createObjectURL(file);
+  wallPhoto.onload=()=>{
+    imgW=wallPhoto.naturalWidth;
+    imgH=wallPhoto.naturalHeight;
+    wallPhoto.style.width=imgW+'px';
+    wallPhoto.style.height=imgH+'px';
+    wallPhoto.style.display='block';
+    placeholder.style.display='none';
+    fitImage();
+  };
+  wallPhoto.src=url;
+});
+
+tools.forEach(tool=>{
+  tool.addEventListener('click',()=>{
+    tools.forEach(t=>t.classList.remove('active'));
+    tool.classList.add('active');
+    selectedTool=tool.dataset.kind;
+    statusText.textContent='Выбран режим: '+tool.innerText.replace(/\\n/g,' ');
+  });
+});
+
+fitBtn.addEventListener('click',fitImage);
+
+shell.addEventListener('pointerdown',e=>{
+  shell.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+  if(e.target.classList.contains('mark') || e.target.closest('.mark')){
+    const m=e.target.classList.contains('mark') ? e.target : e.target.closest('.mark');
+    selectMark(m);
+    draggingMark=m;
+    downInfo={x:e.clientX,y:e.clientY,t:Date.now(),moved:false,onMark:true};
+    return;
+  }
+
+  downInfo={x:e.clientX,y:e.clientY,t:Date.now(),moved:false,onMark:false};
+  if(pointers.size===1){
+    lastPan={x:e.clientX,y:e.clientY};
+  }
+  if(pointers.size===2){
+    const pts=[...pointers.values()];
+    pinchStart={
+      dist:distance(pts[0],pts[1]),
+      scale,
+      tx,
+      ty,
+      cx:(pts[0].x+pts[1].x)/2,
+      cy:(pts[0].y+pts[1].y)/2
+    };
+  }
+});
+
+shell.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId))return;
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+  if(downInfo){
+    const moved=Math.hypot(e.clientX-downInfo.x,e.clientY-downInfo.y)>6;
+    if(moved) downInfo.moved=true;
+  }
+
+  if(draggingMark && pointers.size===1){
+    const p=screenToImage(e.clientX,e.clientY);
+    setMarkPosition(draggingMark,p.x,p.y);
+    return;
+  }
+
+  if(pointers.size===2 && pinchStart){
+    const pts=[...pointers.values()];
+    const d=distance(pts[0],pts[1]);
+    const newScale=clamp(pinchStart.scale*(d/pinchStart.dist),0.15,6);
+    const cx=(pts[0].x+pts[1].x)/2;
+    const cy=(pts[0].y+pts[1].y)/2;
+
+    const imgPointX=(pinchStart.cx-pinchStart.tx)/pinchStart.scale;
+    const imgPointY=(pinchStart.cy-pinchStart.ty)/pinchStart.scale;
+
+    scale=newScale;
+    tx=cx-imgPointX*scale;
+    ty=cy-imgPointY*scale;
+    applyTransform();
+    return;
+  }
+
+  if(pointers.size===1 && lastPan && !draggingMark){
+    const p=[...pointers.values()][0];
+    tx+=p.x-lastPan.x;
+    ty+=p.y-lastPan.y;
+    lastPan={x:p.x,y:p.y};
+    applyTransform();
+  }
+});
+
+shell.addEventListener('pointerup',e=>{
+  pointers.delete(e.pointerId);
+
+  if(draggingMark){
+    draggingMark=null;
+    downInfo=null;
+    return;
+  }
+
+  if(downInfo && !downInfo.moved && !downInfo.onMark && wallPhoto.style.display!=='none'){
+    const p=screenToImage(e.clientX,e.clientY);
+    createMark(p.x,p.y);
+  }
+
+  if(pointers.size<2) pinchStart=null;
+  if(pointers.size===1){
+    const p=[...pointers.values()][0];
+    lastPan={x:p.x,y:p.y};
+  } else {
+    lastPan=null;
+  }
+  downInfo=null;
+});
+
+shell.addEventListener('pointercancel',e=>{
+  pointers.delete(e.pointerId);
+  draggingMark=null;
+  downInfo=null;
+});
+
+function screenToImage(clientX,clientY){
+  const rect=shell.getBoundingClientRect();
+  return {
+    x:(clientX-rect.left-tx)/scale,
+    y:(clientY-rect.top-ty)/scale
+  };
+}
+
+function createMark(x,y){
+  if(!imgW || !imgH)return;
+  markCounter++;
+  const mark=document.createElement('div');
+  mark.className='mark '+selectedTool;
+  mark.dataset.kind=selectedTool;
+  mark.dataset.id='M'+markCounter;
+
+  if(selectedTool==='cross') mark.innerHTML='<div class="hole"></div>';
+  if(selectedTool==='callout') mark.innerHTML='<div class="pin"></div><div class="line"></div><div class="tag">M'+markCounter+'</div>';
+  if(selectedTool==='corners') mark.innerHTML='<div class="a"></div><div class="b"></div>';
+
+  stage.appendChild(mark);
+  setMarkPosition(mark,x,y);
+  selectMark(mark);
+}
+
+function setMarkPosition(mark,x,y){
+  x=clamp(x,0,imgW);
+  y=clamp(y,0,imgH);
+  mark.style.left=x+'px';
+  mark.style.top=y+'px';
+  mark.dataset.x=(x/imgW).toFixed(4);
+  mark.dataset.y=(y/imgH).toFixed(4);
+}
+
+function selectMark(mark){
+  if(selectedMark) selectedMark.classList.remove('selected');
+  selectedMark=mark;
+  selectedMark.classList.add('selected');
+}
+
+deleteBtn.addEventListener('click',()=>{
+  if(!selectedMark)return;
+  selectedMark.remove();
+  selectedMark=null;
+});
+
+clearBtn.addEventListener('click',()=>{
+  document.querySelectorAll('.mark').forEach(m=>m.remove());
+  selectedMark=null;
+});
+
+function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 </script>
 </body>
 </html>
