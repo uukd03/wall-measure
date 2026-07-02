@@ -32,6 +32,11 @@ button.gray{background:#6b7280}button.red{background:#dc2626}button.blue{backgro
 .loupeCanvas{width:100%;height:100%;display:block}.crossX,.crossY{position:absolute;background:#ffda44;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 0 4px rgba(0,0,0,.65)}
 .crossX{width:72px;height:2px}.crossY{height:72px;width:2px}.loupeText{position:absolute;left:8px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;border-radius:999px;padding:4px 7px;font-size:11px;font-weight:700}
 .list{display:flex;gap:6px;flex-wrap:wrap}.objPill{border:1px solid #ddd;background:#f8fafc;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:700}
+
+.sizeControl{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:13px;color:#374151}
+.sizeControl input{flex:1;accent-color:#2563eb}
+.sizeValue{min-width:48px;text-align:right;font-weight:800;color:#111}
+
 </style>
 </head>
 <body>
@@ -61,6 +66,15 @@ button.gray{background:#6b7280}button.red{background:#dc2626}button.blue{backgro
 <div class="labels">
 <div class="labelBtn active" data-mode="icon">🔌1</div><div class="labelBtn" data-mode="letter">R1</div><div class="labelBtn" data-mode="numberSign">№1</div><div class="labelBtn" data-mode="number">1</div>
 </div>
+
+<div class="groupTitle">Размер выноски</div>
+<div class="sizeControl">
+  <span>Меньше</span>
+  <input id="calloutSize" type="range" min="70" max="180" value="120" step="5">
+  <span>Больше</span>
+  <span class="sizeValue" id="calloutSizeValue">120%</span>
+</div>
+
 <div class="status" id="status">Короткий тап — поставить выноску. Удержание 0.5 сек — точная установка через лупу.</div>
 </section>
 <section class="card">
@@ -98,7 +112,17 @@ function cancelHold(){holdActive=false;if(holdRAF)cancelAnimationFrame(holdRAF);
 function showLoupe(x,y){loupe.style.display='block';drawLoupe(x,y)}function hideLoupe(){loupe.style.display='none'}
 function drawLoupe(clientX,clientY){if(!imgW||!imgH)return;const p=screenToImage(clientX,clientY),cw=loupeCanvas.width,ch=loupeCanvas.height;lctx.clearRect(0,0,cw,ch);lctx.fillStyle='#111';lctx.fillRect(0,0,cw,ch);const sw=cw/LOUPE_ZOOM,sh=ch/LOUPE_ZOOM,sx=clamp(p.x-sw/2,0,Math.max(0,imgW-sw)),sy=clamp(p.y-sh/2,0,Math.max(0,imgH-sh));try{lctx.drawImage(photo,sx,sy,sw,sh,0,0,cw,ch)}catch(err){}}
 function screenToImage(clientX,clientY){const r=shell.getBoundingClientRect();return{x:(clientX-r.left-tx)/scale,y:(clientY-r.top-ty)/scale}}
-function createMarker(x,y){counters[selectedType.key]=(counters[selectedType.key]||0)+1;const num=counters[selectedType.key];const marker=document.createElement('div');marker.className='marker';marker.dataset.type=selectedType.key;marker.dataset.prefix=selectedType.prefix;marker.dataset.icon=selectedType.icon;marker.dataset.num=num;marker.innerHTML='<div class="dot"></div><div class="line"></div><div class="tag"></div>';stage.appendChild(marker);setMarkerPosition(marker,x,y);updateMarkerLabel(marker);selectMarker(marker);updateList()}
+
+function applyCalloutScale(m){
+  m.style.setProperty('--callout-scale', calloutScale);
+  m.style.transform='translate(-8px,-31px) scale(var(--callout-scale))';
+  m.style.transformOrigin='0 100%';
+}
+function applyCalloutScaleAll(){
+  document.querySelectorAll('.marker').forEach(applyCalloutScale);
+}
+
+function createMarker(x,y){counters[selectedType.key]=(counters[selectedType.key]||0)+1;const num=counters[selectedType.key];const marker=document.createElement('div');marker.className='marker';applyCalloutScale(marker);marker.dataset.type=selectedType.key;marker.dataset.prefix=selectedType.prefix;marker.dataset.icon=selectedType.icon;marker.dataset.num=num;marker.innerHTML='<div class="dot"></div><div class="line"></div><div class="tag"></div>';stage.appendChild(marker);setMarkerPosition(marker,x,y);updateMarkerLabel(marker);selectMarker(marker);updateList()}
 function setMarkerPosition(marker,x,y){x=clamp(x,0,imgW);y=clamp(y,0,imgH);marker.style.left=x+'px';marker.style.top=y+'px';marker.dataset.x=(x/imgW).toFixed(4);marker.dataset.y=(y/imgH).toFixed(4)}
 function updateMarkerLabel(m){const n=m.dataset.num,p=m.dataset.prefix,ico=m.dataset.icon;let text=n;if(labelMode==='icon')text=ico+n;if(labelMode==='letter')text=p+n;if(labelMode==='numberSign')text='№'+n;m.querySelector('.tag').textContent=text}
 function refreshAllLabels(){document.querySelectorAll('.marker').forEach(updateMarkerLabel)}
@@ -107,6 +131,17 @@ document.getElementById('deleteBtn').onclick=()=>{if(!selectedMarker)return;sele
 document.getElementById('clearBtn').onclick=()=>{document.querySelectorAll('.marker').forEach(m=>m.remove());counters={};selectedMarker=null;updateList()};
 function updateList(){const items=[...document.querySelectorAll('.marker')].map(m=>'<span class="objPill">'+m.querySelector('.tag').textContent+'</span>');objectList.innerHTML=items.length?items.join(''):'<span class="hint">Пока объектов нет</span>'}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+
+const calloutSize=document.getElementById('calloutSize');
+const calloutSizeValue=document.getElementById('calloutSizeValue');
+if(calloutSize){
+  calloutSize.addEventListener('input',()=>{
+    calloutScale=Number(calloutSize.value)/100;
+    calloutSizeValue.textContent=calloutSize.value+'%';
+    applyCalloutScaleAll();
+  });
+}
+
 updateList();
 </script>
 </body>
