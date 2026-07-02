@@ -1,148 +1,19 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wall Measure v0.4</title>
-<style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;overscroll-behavior:none}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f2f2f2;color:#202124}
-header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #ddd;padding:10px 12px}
-h1{font-size:17px;margin:0}.sub{font-size:12px;color:#6b7280;margin-top:3px}
-main{padding:10px;max-width:980px;margin:0 auto}.card{background:#fff;border-radius:16px;padding:10px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}button,.fileBtn{border:0;border-radius:12px;background:#222;color:#fff;font-weight:700;font-size:14px;padding:10px 12px;cursor:pointer;display:inline-block}
-button.gray{background:#6b7280}button.red{background:#dc2626}button.blue{background:#2563eb}input[type=file]{display:none}
-.groupTitle{font-size:13px;font-weight:800;margin:8px 0 6px;color:#374151}.types,.labels{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.typeBtn,.labelBtn{border:2px solid #d1d5db;background:#fff;color:#111;border-radius:14px;padding:8px 4px;font-size:12px;text-align:center;cursor:pointer;user-select:none}
-.typeBtn .ico{font-size:22px;display:block;margin-bottom:3px}.typeBtn.active,.labelBtn.active{border-color:#2563eb;background:#dbeafe}
-.status{font-size:13px;color:#374151;line-height:1.35;margin-top:8px}.hint{font-size:13px;color:#6b7280;line-height:1.4;margin:0 0 8px}
-.shell{position:relative;height:63vh;min-height:390px;background:#1c1c1c;border:2px solid #d1d5db;border-radius:16px;overflow:hidden;touch-action:none}
-.stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}.stage img{display:block;max-width:none;user-select:none;-webkit-user-drag:none}
-.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#ddd;line-height:1.35;padding:20px}
-.scaleBadge{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.7);color:#fff;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:700;z-index:40}
-.marker{position:absolute;left:0;top:0;width:92px;height:36px;transform:translate(-8px,-31px);z-index:30;touch-action:none;user-select:none;cursor:grab}
-.marker .dot{position:absolute;left:0;bottom:0;width:11px;height:11px;background:#f59e0b;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 7px rgba(0,0,0,.45)}
-.marker .line{position:absolute;left:9px;bottom:8px;width:34px;height:2px;background:#f59e0b;transform:rotate(-18deg);transform-origin:left center;box-shadow:0 1px 4px rgba(0,0,0,.28)}
-.marker .tag{position:absolute;right:0;top:0;min-width:45px;height:26px;padding:0 8px;border-radius:999px;background:rgba(245,158,11,.96);color:#111;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 9px rgba(0,0,0,.35);border:1px solid rgba(0,0,0,.15)}
-.marker.selected .tag{background:#2563eb;color:#fff}.marker.selected .dot,.marker.selected .line{background:#2563eb}
-.holdRing{position:absolute;width:54px;height:54px;border-radius:50%;pointer-events:none;z-index:80;display:none;transform:translate(-50%,-50%)}
-.holdRing svg{width:54px;height:54px;transform:rotate(-90deg);filter:drop-shadow(0 2px 5px rgba(0,0,0,.35))}
-.holdRing .bg{fill:rgba(255,255,255,.18);stroke:rgba(255,255,255,.9);stroke-width:4}.holdRing .fg{fill:none;stroke:#f59e0b;stroke-width:5;stroke-linecap:round;stroke-dasharray:138;stroke-dashoffset:138}
-.loupe{position:absolute;right:10px;top:10px;width:150px;height:150px;border-radius:18px;border:3px solid #fff;background:#111;z-index:90;display:none;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,.45)}
-.loupeCanvas{width:100%;height:100%;display:block}.crossX,.crossY{position:absolute;background:#ffda44;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 0 4px rgba(0,0,0,.65)}
-.crossX{width:72px;height:2px}.crossY{height:72px;width:2px}.loupeText{position:absolute;left:8px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;border-radius:999px;padding:4px 7px;font-size:11px;font-weight:700}
-.list{display:flex;gap:6px;flex-wrap:wrap}.objPill{border:1px solid #ddd;background:#f8fafc;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:700}
-
-.sizeControl{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:13px;color:#374151}
-.sizeControl input{flex:1;accent-color:#2563eb}
-.sizeValue{min-width:48px;text-align:right;font-weight:800;color:#111}
-
-</style>
-</head>
-<body>
-<header><h1>Wall Measure v0.4</h1><div class="sub">Выноски · лупа по удержанию · быстрый тап</div></header>
-<main>
-<section class="card">
-<div class="row">
-<label class="fileBtn" for="photoInput">Загрузить фото</label><input id="photoInput" type="file" accept="image/*">
-<button class="blue" id="fitBtn">Вписать фото</button><button class="gray" id="deleteBtn">Удалить выбранный</button><button class="red" id="clearBtn">Очистить всё</button>
-</div>
-<div class="groupTitle">Тип объекта</div>
-<div class="types" id="types">
-<div class="typeBtn active" data-key="socket" data-prefix="R" data-icon="🔌"><span class="ico">🔌</span>Розетка</div>
-<div class="typeBtn" data-key="switch" data-prefix="S" data-icon="⏻"><span class="ico">⏻</span>Выключатель</div>
-<div class="typeBtn" data-key="light" data-prefix="L" data-icon="💡"><span class="ico">💡</span>Свет</div>
-<div class="typeBtn" data-key="tv" data-prefix="TV" data-icon="📺"><span class="ico">📺</span>ТВ</div>
-<div class="typeBtn" data-key="internet" data-prefix="NET" data-icon="🌐"><span class="ico">🌐</span>Интернет</div>
-<div class="typeBtn" data-key="water" data-prefix="W" data-icon="🚰"><span class="ico">🚰</span>Вода</div>
-<div class="typeBtn" data-key="sewer" data-prefix="K" data-icon="⬇️"><span class="ico">⬇️</span>Канал.</div>
-<div class="typeBtn" data-key="mixer" data-prefix="M" data-icon="🚿"><span class="ico">🚿</span>Смес.</div>
-<div class="typeBtn" data-key="radiator" data-prefix="RAD" data-icon="♨️"><span class="ico">♨️</span>Радиатор</div>
-<div class="typeBtn" data-key="window" data-prefix="OK" data-icon="🪟"><span class="ico">🪟</span>Окно</div>
-<div class="typeBtn" data-key="door" data-prefix="D" data-icon="🚪"><span class="ico">🚪</span>Дверь</div>
-<div class="typeBtn" data-key="box" data-prefix="B" data-icon="📦"><span class="ico">📦</span>Короб</div>
-</div>
-<div class="groupTitle">Вид подписи</div>
-<div class="labels">
-<div class="labelBtn active" data-mode="icon">🔌1</div><div class="labelBtn" data-mode="letter">R1</div><div class="labelBtn" data-mode="numberSign">№1</div><div class="labelBtn" data-mode="number">1</div>
-</div>
-
-<div class="groupTitle">Размер выноски</div>
-<div class="sizeControl">
-  <span>Меньше</span>
-  <input id="calloutSize" type="range" min="70" max="180" value="120" step="5">
-  <span>Больше</span>
-  <span class="sizeValue" id="calloutSizeValue">120%</span>
-</div>
-
-<div class="status" id="status">Короткий тап — поставить выноску. Удержание 0.5 сек — точная установка через лупу.</div>
-</section>
-<section class="card">
-<p class="hint">Быстрый тап ставит выноску сразу. Удержание 0.5 сек показывает лупу. Удержание на уже поставленной выноске — точное перемещение через лупу.</p>
-<div class="shell" id="shell">
-<div class="placeholder" id="placeholder">Загрузите фото стены</div>
-<div class="stage" id="stage"><img id="photo" alt="" style="display:none"></div>
-<div class="scaleBadge" id="scaleBadge">100%</div>
-<div class="holdRing" id="holdRing"><svg viewBox="0 0 54 54"><circle class="bg" cx="27" cy="27" r="22"></circle><circle class="fg" id="ringFg" cx="27" cy="27" r="22"></circle></svg></div>
-<div class="loupe" id="loupe"><canvas class="loupeCanvas" id="loupeCanvas" width="300" height="300"></canvas><div class="crossX"></div><div class="crossY"></div><div class="loupeText">точная установка</div></div>
-</div>
-</section>
-<section class="card"><div class="groupTitle">Поставленные объекты</div><div class="list" id="objectList"></div></section>
-</main>
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Wall Measure v0.5</title><style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}.app{position:fixed;inset:0;overflow:hidden;background:#111}canvas{position:absolute;inset:0;width:100vw;height:100vh;display:block;touch-action:none;user-select:none;-webkit-user-select:none}.empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#d1d5db;padding:25px;line-height:1.45;pointer-events:none}.topBar{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 8px);height:38px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;z-index:10}.badge{background:rgba(0,0,0,.62);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:8px 11px;font-size:13px;font-weight:800;pointer-events:auto}.menuToggle{position:absolute;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:30;border:0;border-radius:999px;background:#2563eb;color:#fff;font-weight:900;font-size:15px;padding:12px 15px;box-shadow:0 8px 30px rgba(0,0,0,.35)}.sheet{position:absolute;left:0;right:0;bottom:0;z-index:20;background:rgba(248,250,252,.96);color:#111;border-radius:22px 22px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.35);padding:10px 12px calc(env(safe-area-inset-bottom) + 14px);transform:translateY(calc(100% - 54px));transition:transform .22s ease;touch-action:auto}.sheet.open{transform:translateY(0)}.handle{width:44px;height:5px;border-radius:999px;background:#9ca3af;margin:0 auto 10px}.sheetHead{display:flex;justify-content:space-between;align-items:center;gap:10px;height:34px}.sheetTitle{font-size:15px;font-weight:900}.small{font-size:12px;color:#6b7280}.controls{display:grid;gap:10px;margin-top:12px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}button,.fileBtn{border:0;border-radius:13px;background:#111827;color:#fff;font-weight:800;font-size:14px;padding:10px 12px;display:inline-block}button.blue{background:#2563eb}button.gray{background:#6b7280}button.red{background:#dc2626}input[type=file]{display:none}.rangeRow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;font-size:13px}input[type=range]{width:100%;accent-color:#2563eb}.value{font-weight:900;min-width:58px;text-align:right}.hint{font-size:12px;line-height:1.35;color:#4b5563}.list{display:flex;gap:6px;flex-wrap:wrap;max-height:80px;overflow:auto}.pill{background:#e5e7eb;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:800}
+</style></head><body><div class="app"><canvas id="canvas"></canvas><div class="empty" id="empty">Открой меню снизу и загрузи фото стены</div><div class="topBar"><div class="badge" id="zoomBadge">100%</div><div class="badge">Тап — выноска</div></div><button class="menuToggle" id="menuToggle">Меню</button><div class="sheet" id="sheet"><div class="handle"></div><div class="sheetHead"><div><div class="sheetTitle">Wall Measure v0.5</div><div class="small">Canvas · полный экран · выноски</div></div><button class="gray" id="collapseBtn">Свернуть</button></div><div class="controls"><div class="row"><label class="fileBtn" for="photoInput">Загрузить фото</label><input id="photoInput" type="file" accept="image/*"><button class="blue" id="fitBtn">Вписать</button><button class="red" id="clearBtn">Очистить</button></div><div class="rangeRow"><span>Размер выноски</span><input id="calloutSize" type="range" min="50" max="500" value="180" step="10"><span class="value" id="calloutSizeValue">180%</span></div><div class="hint">Короткий тап по фото ставит выноску. Потяни существующую выноску — она передвинется. Два пальца — зум вокруг точки между пальцами. Один палец по пустому месту — перемещение фото.</div><div><div class="small" style="margin-bottom:6px;font-weight:800">Поставленные выноски</div><div class="list" id="objectList"><span class="pill">Пока нет</span></div></div></div></div></div>
 <script>
-const photoInput=document.getElementById('photoInput'),photo=document.getElementById('photo'),stage=document.getElementById('stage'),shell=document.getElementById('shell'),placeholder=document.getElementById('placeholder'),scaleBadge=document.getElementById('scaleBadge'),holdRing=document.getElementById('holdRing'),ringFg=document.getElementById('ringFg'),loupe=document.getElementById('loupe'),loupeCanvas=document.getElementById('loupeCanvas'),lctx=loupeCanvas.getContext('2d'),objectList=document.getElementById('objectList');
-let imgW=0,imgH=0,scale=1,tx=0,ty=0,pointers=new Map(),panLast=null,pinchStart=null;
-let selectedType={key:'socket',prefix:'R',icon:'🔌'},labelMode='icon',counters={},selectedMarker=null;
-let holdRAF=null,holdActive=false,holdStart=0,down=null,draggingMarker=null,usingLoupe=false;
-const HOLD_MS=500, LOUPE_ZOOM=4.5;
-function applyTransform(){stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';scaleBadge.textContent=Math.round(scale*100)+'%'}
-function fitImage(){if(!imgW||!imgH)return;const sw=shell.clientWidth,sh=shell.clientHeight;scale=Math.min(sw/imgW,sh/imgH);tx=(sw-imgW*scale)/2;ty=(sh-imgH*scale)/2;applyTransform()}
-photoInput.addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;photo.onload=()=>{imgW=photo.naturalWidth;imgH=photo.naturalHeight;photo.style.width=imgW+'px';photo.style.height=imgH+'px';photo.style.display='block';placeholder.style.display='none';fitImage()};photo.src=URL.createObjectURL(file)});
-document.getElementById('fitBtn').onclick=fitImage;
-document.querySelectorAll('.typeBtn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.typeBtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedType={key:btn.dataset.key,prefix:btn.dataset.prefix,icon:btn.dataset.icon}}});
-document.querySelectorAll('.labelBtn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.labelBtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');labelMode=btn.dataset.mode;refreshAllLabels()}});
-shell.addEventListener('pointerdown',e=>{shell.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const marker=e.target.closest('.marker');if(marker){selectMarker(marker);draggingMarker=marker;down={x:e.clientX,y:e.clientY,moved:false,onMarker:true};startHold(e.clientX,e.clientY,()=>{usingLoupe=true;showLoupe(e.clientX,e.clientY)});return}if(photo.style.display==='none'){alert('Сначала загрузите фото.');return}down={x:e.clientX,y:e.clientY,moved:false,onMarker:false};if(pointers.size===1)panLast={x:e.clientX,y:e.clientY};if(pointers.size===2)startPinch();startHold(e.clientX,e.clientY,()=>{usingLoupe=true;showLoupe(e.clientX,e.clientY)})});
-shell.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>7)down.moved=true;if(usingLoupe){showLoupe(e.clientX,e.clientY);if(draggingMarker){const p=screenToImage(e.clientX,e.clientY);setMarkerPosition(draggingMarker,p.x,p.y)}return}if(draggingMarker&&pointers.size===1){cancelHold();const p=screenToImage(e.clientX,e.clientY);setMarkerPosition(draggingMarker,p.x,p.y);return}if(pointers.size===2&&pinchStart){cancelHold();const pts=[...pointers.values()],curDist=dist(pts[0],pts[1]);const cx=(pts[0].x+pts[1].x)/2,cy=(pts[0].y+pts[1].y)/2;scale=clamp(pinchStart.scale*(curDist/pinchStart.dist),0.12,8);tx=cx-pinchStart.imgX*scale;ty=cy-pinchStart.imgY*scale;applyTransform();return}if(pointers.size===1&&panLast&&!draggingMarker&&down&&down.moved){cancelHold();const p=[...pointers.values()][0];tx+=p.x-panLast.x;ty+=p.y-panLast.y;panLast={x:p.x,y:p.y};applyTransform()}});
-shell.addEventListener('pointerup',e=>{pointers.delete(e.pointerId);const wasLoupe=usingLoupe;cancelHold();if(wasLoupe){const p=screenToImage(e.clientX,e.clientY);if(draggingMarker){setMarkerPosition(draggingMarker,p.x,p.y);draggingMarker=null}else createMarker(p.x,p.y);hideLoupe();resetGesture();return}if(draggingMarker){draggingMarker=null;resetGesture();return}if(down&&!down.moved&&!down.onMarker&&photo.style.display!=='none'){const p=screenToImage(e.clientX,e.clientY);createMarker(p.x,p.y)}resetGesture()});
-shell.addEventListener('pointercancel',()=>{cancelHold();hideLoupe();resetGesture();draggingMarker=null});
-function resetGesture(){if(pointers.size<2)pinchStart=null;if(pointers.size===1){const p=[...pointers.values()][0];panLast={x:p.x,y:p.y}}else panLast=null;down=null;usingLoupe=false}
-function startPinch(){const pts=[...pointers.values()],cx=(pts[0].x+pts[1].x)/2,cy=(pts[0].y+pts[1].y)/2;pinchStart={dist:dist(pts[0],pts[1]),scale:scale,imgX:(cx-tx)/scale,imgY:(cy-ty)/scale}}
-function startHold(x,y,onComplete){cancelHold();holdStart=performance.now();holdActive=true;holdRing.style.display='block';holdRing.style.left=x+'px';holdRing.style.top=y+'px';ringFg.style.strokeDashoffset=138;function tick(now){if(!holdActive)return;const t=clamp((now-holdStart)/HOLD_MS,0,1);ringFg.style.strokeDashoffset=138*(1-t);if(t>=1){holdActive=false;holdRing.style.display='none';onComplete();return}holdRAF=requestAnimationFrame(tick)}holdRAF=requestAnimationFrame(tick)}
-function cancelHold(){holdActive=false;if(holdRAF)cancelAnimationFrame(holdRAF);holdRing.style.display='none'}
-function showLoupe(x,y){loupe.style.display='block';drawLoupe(x,y)}function hideLoupe(){loupe.style.display='none'}
-function drawLoupe(clientX,clientY){if(!imgW||!imgH)return;const p=screenToImage(clientX,clientY),cw=loupeCanvas.width,ch=loupeCanvas.height;lctx.clearRect(0,0,cw,ch);lctx.fillStyle='#111';lctx.fillRect(0,0,cw,ch);const sw=cw/LOUPE_ZOOM,sh=ch/LOUPE_ZOOM,sx=clamp(p.x-sw/2,0,Math.max(0,imgW-sw)),sy=clamp(p.y-sh/2,0,Math.max(0,imgH-sh));try{lctx.drawImage(photo,sx,sy,sw,sh,0,0,cw,ch)}catch(err){}}
-function screenToImage(clientX,clientY){const r=shell.getBoundingClientRect();return{x:(clientX-r.left-tx)/scale,y:(clientY-r.top-ty)/scale}}
-
-function applyCalloutScale(m){
-  m.style.setProperty('--callout-scale', calloutScale);
-  m.style.transform='translate(-8px,-31px) scale(var(--callout-scale))';
-  m.style.transformOrigin='0 100%';
-}
-function applyCalloutScaleAll(){
-  document.querySelectorAll('.marker').forEach(applyCalloutScale);
-}
-
-function createMarker(x,y){counters[selectedType.key]=(counters[selectedType.key]||0)+1;const num=counters[selectedType.key];const marker=document.createElement('div');marker.className='marker';applyCalloutScale(marker);marker.dataset.type=selectedType.key;marker.dataset.prefix=selectedType.prefix;marker.dataset.icon=selectedType.icon;marker.dataset.num=num;marker.innerHTML='<div class="dot"></div><div class="line"></div><div class="tag"></div>';stage.appendChild(marker);setMarkerPosition(marker,x,y);updateMarkerLabel(marker);selectMarker(marker);updateList()}
-function setMarkerPosition(marker,x,y){x=clamp(x,0,imgW);y=clamp(y,0,imgH);marker.style.left=x+'px';marker.style.top=y+'px';marker.dataset.x=(x/imgW).toFixed(4);marker.dataset.y=(y/imgH).toFixed(4)}
-function updateMarkerLabel(m){const n=m.dataset.num,p=m.dataset.prefix,ico=m.dataset.icon;let text=n;if(labelMode==='icon')text=ico+n;if(labelMode==='letter')text=p+n;if(labelMode==='numberSign')text='№'+n;m.querySelector('.tag').textContent=text}
-function refreshAllLabels(){document.querySelectorAll('.marker').forEach(updateMarkerLabel)}
-function selectMarker(m){if(selectedMarker)selectedMarker.classList.remove('selected');selectedMarker=m;selectedMarker.classList.add('selected')}
-document.getElementById('deleteBtn').onclick=()=>{if(!selectedMarker)return;selectedMarker.remove();selectedMarker=null;updateList()};
-document.getElementById('clearBtn').onclick=()=>{document.querySelectorAll('.marker').forEach(m=>m.remove());counters={};selectedMarker=null;updateList()};
-function updateList(){const items=[...document.querySelectorAll('.marker')].map(m=>'<span class="objPill">'+m.querySelector('.tag').textContent+'</span>');objectList.innerHTML=items.length?items.join(''):'<span class="hint">Пока объектов нет</span>'}
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
-
-const calloutSize=document.getElementById('calloutSize');
-const calloutSizeValue=document.getElementById('calloutSizeValue');
-if(calloutSize){
-  calloutSize.addEventListener('input',()=>{
-    calloutScale=Number(calloutSize.value)/100;
-    calloutSizeValue.textContent=calloutSize.value+'%';
-    applyCalloutScaleAll();
-  });
-}
-
-updateList();
-</script>
-</body>
-</html>
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),empty=document.getElementById('empty'),zoomBadge=document.getElementById('zoomBadge'),objectList=document.getElementById('objectList'),sheet=document.getElementById('sheet');let dpr=window.devicePixelRatio||1,W=0,H=0,img=null,imgW=0,imgH=0,scale=1,tx=0,ty=0,callouts=[],nextId=1,calloutSize=1.8,selectedId=null,pointers=new Map(),gesture=null,dragCallout=null,downInfo=null;
+function resize(){W=innerWidth;H=innerHeight;dpr=devicePixelRatio||1;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);draw()}addEventListener('resize',resize);resize();
+document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('gesturestart',e=>e.preventDefault());document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+document.getElementById('menuToggle').onclick=()=>sheet.classList.add('open');document.getElementById('collapseBtn').onclick=()=>sheet.classList.remove('open');
+document.getElementById('photoInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{img=im;imgW=im.naturalWidth;imgH=im.naturalHeight;empty.style.display='none';fitImage()};im.src=URL.createObjectURL(f)});document.getElementById('fitBtn').onclick=fitImage;document.getElementById('clearBtn').onclick=()=>{callouts=[];nextId=1;selectedId=null;updateList();draw()};
+const sizeSlider=document.getElementById('calloutSize'),sizeValue=document.getElementById('calloutSizeValue');sizeSlider.addEventListener('input',()=>{calloutSize=Number(sizeSlider.value)/100;sizeValue.textContent=sizeSlider.value+'%';draw()});
+function fitImage(){if(!img)return;scale=Math.min(W/imgW,H/imgH);tx=(W-imgW*scale)/2;ty=(H-imgH*scale)/2;draw()}function imageToScreen(x,y){return{x:tx+x*scale,y:ty+y*scale}}function screenToImage(x,y){return{x:(x-tx)/scale,y:(y-ty)/scale}}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);if(img){ctx.save();ctx.setTransform(dpr*scale,0,0,dpr*scale,dpr*tx,dpr*ty);ctx.drawImage(img,0,0);ctx.restore()}for(const c of callouts)drawCallout(c);zoomBadge.textContent=Math.round(scale*100)+'%'}
+function drawCallout(c){const p=imageToScreen(c.x,c.y),k=calloutSize,dotR=5*k,tagW=48*k,tagH=28*k,offX=52*k,offY=-36*k,color=c.id===selectedId?'#2563eb':'#f59e0b',x2=p.x+offX,y2=p.y+offY;ctx.save();ctx.lineWidth=Math.max(2,2.5*k);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=7*k;ctx.beginPath();ctx.arc(p.x,p.y,dotR,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,dotR*.45,0,Math.PI*2);ctx.fill();ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(p.x+dotR,p.y-dotR*.3);ctx.lineTo(x2,y2+tagH/2);ctx.stroke();roundRect(ctx,x2,y2,tagW,tagH,tagH/2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.stroke();ctx.fillStyle=c.id===selectedId?'#fff':'#111';ctx.font=`${Math.round(15*k)}px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(c.id),x2+tagW/2,y2+tagH/2+1);c.hit={x:x2,y:y2,w:tagW,h:tagH,anchorX:p.x,anchorY:p.y,r:Math.max(dotR,14)};ctx.restore()}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}function hitCallout(x,y){for(let i=callouts.length-1;i>=0;i--){const c=callouts[i],h=c.hit;if(!h)continue;if(x>=h.x-10&&x<=h.x+h.w+10&&y>=h.y-10&&y<=h.y+h.h+10)return c;if(Math.hypot(x-h.anchorX,y-h.anchorY)<h.r+10)return c}return null}
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const hit=hitCallout(e.clientX,e.clientY);downInfo={x:e.clientX,y:e.clientY,moved:false,hit:hit?hit.id:null};if(hit&&pointers.size===1){selectedId=hit.id;dragCallout=hit;draw();return}if(pointers.size===2){startPinch();dragCallout=null;return}gesture={type:'pan',lastX:e.clientX,lastY:e.clientY}});
+canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(downInfo&&Math.hypot(e.clientX-downInfo.x,e.clientY-downInfo.y)>6)downInfo.moved=true;if(pointers.size===2&&gesture&&gesture.type==='pinch'){const pts=[...pointers.values()],cx=(pts[0].x+pts[1].x)/2,cy=(pts[0].y+pts[1].y)/2,dist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),newScale=clamp(gesture.startScale*(dist/gesture.startDist),0.05,12);scale=newScale;tx=cx-gesture.imgX*scale;ty=cy-gesture.imgY*scale;draw();return}if(dragCallout&&pointers.size===1){const p=screenToImage(e.clientX,e.clientY);dragCallout.x=clamp(p.x,0,imgW||p.x);dragCallout.y=clamp(p.y,0,imgH||p.y);draw();return}if(gesture&&gesture.type==='pan'&&pointers.size===1&&img){tx+=e.clientX-gesture.lastX;ty+=e.clientY-gesture.lastY;gesture.lastX=e.clientX;gesture.lastY=e.clientY;draw()}});
+canvas.addEventListener('pointerup',e=>{pointers.delete(e.pointerId);if(pointers.size<2&&gesture&&gesture.type==='pinch')gesture=null;if(dragCallout){dragCallout=null;updateList();return}if(downInfo&&!downInfo.moved&&img&&!downInfo.hit){const p=screenToImage(e.clientX,e.clientY);if(p.x>=0&&p.x<=imgW&&p.y>=0&&p.y<=imgH){callouts.push({id:nextId++,x:p.x,y:p.y});selectedId=nextId-1;updateList();draw()}}if(pointers.size===1){const p=[...pointers.values()][0];gesture={type:'pan',lastX:p.x,lastY:p.y}}else gesture=null;downInfo=null});canvas.addEventListener('pointercancel',()=>{pointers.clear();gesture=null;dragCallout=null;downInfo=null});
+function startPinch(){const pts=[...pointers.values()],cx=(pts[0].x+pts[1].x)/2,cy=(pts[0].y+pts[1].y)/2,p=screenToImage(cx,cy);gesture={type:'pinch',startDist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),startScale:scale,imgX:p.x,imgY:p.y}}function updateList(){objectList.innerHTML=callouts.length?callouts.map(c=>`<span class="pill">Выноска ${c.id}</span>`).join(''):'<span class="pill">Пока нет</span>'}function clamp(v,min,max){return Math.max(min,Math.min(max,v))}draw();
+</script></body></html>
